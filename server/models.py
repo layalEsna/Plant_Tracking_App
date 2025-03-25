@@ -8,6 +8,8 @@
 # from sqlalchemy_serializer impor
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow import fields
+from datetime import date
+
 
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relationship
@@ -23,7 +25,7 @@ metadata = MetaData(naming_convention={
 db = SQLAlchemy(metadata=metadata)
 bcrypt = Bcrypt()
 
-# Models  Mete:
+# Models  
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -87,10 +89,11 @@ class Plant(db.Model):
         return plant_name
     @validates('created_at')
     def validate_created_at(self, key, created_at):
-        if not created_at or not isinstance(created_at, Date):
+        if not created_at or not isinstance(created_at, date):
             raise ValueError('created_at is required and must be a date type.')
+        return created_at
         
-    
+      
 class PlantSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Plant
@@ -98,6 +101,7 @@ class PlantSchema(SQLAlchemyAutoSchema):
     user = fields.Nested('UserSchema')
     category = fields.Nested('CategorySchema')
     care_notes = fields.Nested('CareNoteSchema', many=True)
+    created_at = fields.Date(format='%Y-%m-%d')
 
 class Category(db.Model):
     __tablename__ = 'categories'
@@ -143,29 +147,32 @@ class CareNote(db.Model):
         return care_type
     
     @validates('frequency')
-    def validate_frequency(self,key, frequency):
-        if not frequency or not isinstance(frequency, int):
-            raise ValueError('Frequency is required and must be an integer.')
-        if frequency < 1:
+    def validate_frequency(self, key, frequency):
+        if frequency is not None and not isinstance(frequency, int):
+            raise ValueError('Frequency must be an integer.')
+        if frequency is not None and frequency < 1:
             raise ValueError('Frequency must be a positive integer.')
+        return frequency
 
     @validates('starting_date')
     def validate_starting_date(self, key, starting_date):
         if not starting_date or not isinstance(starting_date, date):
             raise ValueError('starting_date is required and must be a date type.')
+        return starting_date
         
     @validates('next_care_date')
     def validate_next_care_date(self, key, next_care_date):
         if not next_care_date or not isinstance(next_care_date, date):
             raise ValueError('next_care_date is required and must be a date type.')
+        return next_care_date
         
     @validates('custom_interval')
-    def validate_custom_interval(self,key, custom_interval):
-        if not custom_interval or not isinstance(custom_interval, int):
-            raise ValueError('custom_interval is required and must be an integer.')
-        if custom_interval < 1:
+    def validate_custom_interval(self, key, custom_interval):
+        if custom_interval is not None and not isinstance(custom_interval, int):
+            raise ValueError('custom_interval must be an integer.')
+        if custom_interval is not None and custom_interval < 1:
             raise ValueError('custom_interval must be a positive integer.')
-
+        return custom_interval
 
 
 class CareNoteSchema(SQLAlchemyAutoSchema):
@@ -173,3 +180,5 @@ class CareNoteSchema(SQLAlchemyAutoSchema):
         model = CareNote
         load_instance = True
     plants = fields.Nested('PlantSchema')
+    starting_date = fields.Date(format='%Y-%m-%d')
+    next_care_date = fields.Date(format='%Y-%m-%d')
