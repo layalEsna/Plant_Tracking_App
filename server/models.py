@@ -6,9 +6,9 @@
 ###################################
 
 # from sqlalchemy_serializer impor
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from marshmallow import fields
-from datetime import date
+# from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+# from marshmallow import fields
+# from datetime import date
 
 
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -24,6 +24,10 @@ metadata = MetaData(naming_convention={
 # note
 db = SQLAlchemy(metadata=metadata)
 bcrypt = Bcrypt()
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from marshmallow import fields
+from datetime import date
+
 
 # Models  
 
@@ -59,11 +63,6 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
-class UserSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = User
-        load_instance = True
-    plants = fields.Nested('PlantsSchema', many=True)
 
 class Plant(db.Model):
     __tablename__ = 'plants'
@@ -94,15 +93,6 @@ class Plant(db.Model):
         return created_at
         
       
-class PlantSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Plant
-        load_instance = True
-    user = fields.Nested('UserSchema')
-    category = fields.Nested('CategorySchema')
-    care_notes = fields.Nested('CareNoteSchema', many=True)
-    created_at = fields.Date(format='%Y-%m-%d')
-
 class Category(db.Model):
     __tablename__ = 'categories'
 
@@ -119,11 +109,6 @@ class Category(db.Model):
             raise ValueError('category_name must be between 5 and 100 characters inclusive.')
         return category_name
 
-class CategorySchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Category
-        load_instance = True
-    plants = fields.Nested('PlantSchema', many=True)
 
 class CareNote(db.Model):
     __tablename__ = 'care_notes'
@@ -173,12 +158,33 @@ class CareNote(db.Model):
         if custom_interval is not None and custom_interval < 1:
             raise ValueError('custom_interval must be a positive integer.')
         return custom_interval
+    
+class UserSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        load_instance = True
+    plants = fields.Nested('PlantsSchema', many=True)
+
+class PlantSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Plant
+        load_instance = True
+    user = fields.Nested('UserSchema')
+    category = fields.Nested('CategorySchema')
+    care_notes = fields.Nested('CareNoteSchema', many=True)
+    created_at = fields.Date(format='%Y-%m-%d')
+
+class CategorySchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Category
+        load_instance = True
+    plants = fields.Nested('PlantSchema', many=True)
 
 
 class CareNoteSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = CareNote
         load_instance = True
-    plants = fields.Nested('PlantSchema')
+    plants = fields.Nested('PlantSchema', many=True)
     starting_date = fields.Date(format='%Y-%m-%d')
     next_care_date = fields.Date(format='%Y-%m-%d')
