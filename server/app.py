@@ -73,12 +73,22 @@ api = Api(app)
 CORS(app)
 
 # Import models after initializing db to prevent circular imports
-from models import Plant, Category, CareNote, User
+from models import *
+# Plant, Category, CareNote, User
 
 # Views go here!
 @app.route('/')
 def index():
     return '<h1>Project Server</h1>'
+
+class CheckSession(Resource):
+    def get(self, user_id):
+        user = User.query.get(user_id)
+        if not user_id:
+            return {'error': 'Unauthorized.'}, 401
+        
+        user_schema = UserSchema()
+        return user_schema.dump(user), 200
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
