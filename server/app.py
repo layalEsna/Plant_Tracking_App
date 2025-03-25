@@ -118,8 +118,21 @@ class Signup(Resource):
             'id': new_user.id
         }), 201
     
+class UserById(Resource):
+    def get(self, user_id):
+        user_session_id = session.get('user_id')
+        if user_session_id is None or user_session_id != user_id:
+            return {'error': 'Unauthorized or user not found.'}, 403
+        user = User.query.get(user_id)
+        if not user:
+            return {'error': 'User not found.'}, 404
+        user_schema = UserSchema()
+        return jsonify(user_schema.dump(user)), 200
+        
 
+        
 api.add_resource(Signup, '/signup')
+api.add_resource(UserById, '/users/<int:user_id>')
 
 
 if __name__ == '__main__':
