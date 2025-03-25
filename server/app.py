@@ -117,6 +117,9 @@ class Signup(Resource):
             'username': new_user.username,
             'id': new_user.id
         }), 201
+    
+
+api.add_resource(Signup, '/signup')
 
 
 if __name__ == '__main__':
