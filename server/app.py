@@ -89,6 +89,35 @@ class CheckSession(Resource):
         
         user_schema = UserSchema()
         return user_schema.dump(user), 200
+class Signup(Resource):
+    def post(self):
+
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        confirmed_password = data.get('confirmed_password')
+
+        if not all([username, password, confirmed_password]):
+            return {'error': 'All fields are required.'}, 400
+        if User.query.filter(User.username == username).first():
+            return {'error': 'Username already exists.'}, 400
+        if password != confirmed_password:
+            return {'error': "Password doesn't match"}, 400
+        
+        new_user = User(
+            username = username,
+            password =password,
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        session['user_id'] = new_user.id
+        session.permanent = True 
+
+        return jsonify({
+            'username': new_user.username,
+            'id': new_user.id
+        }), 201
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
