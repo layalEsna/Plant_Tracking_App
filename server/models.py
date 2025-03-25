@@ -83,8 +83,8 @@ class Plant(db.Model):
     def validate_plant_name(self, key, plant_name):
         if not plant_name or not isinstance(plant_name, str):
             raise ValueError('Plant_name is required and must be a string.')
-        if len(plant_name) < 5 or len(plant_name) > 100:
-            raise ValueError('plant_name must be between 5 and 100 characters inclusive.')
+        if len(plant_name) < 2 or len(plant_name) > 100:
+            raise ValueError('plant_name must be between 2 and 100 characters inclusive.')
         return plant_name
     @validates('created_at')
     def validate_created_at(self, key, created_at):
