@@ -60,7 +60,7 @@ const Signup = () => {
                         throw new Error('Signup failed.')
                     }
                     setUser (data)
-                    navigate('/items')
+                    // navigate('/items')
 
                 })
                 .catch(e => {

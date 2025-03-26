@@ -117,6 +117,26 @@ class Signup(Resource):
             'username': new_user.username,
             'id': new_user.id
         }), 201
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+
+        if not all([username, password]):
+            return {'error': 'All fields are required'}, 400
+
+
+        user = User.query.filter(User.username == username).first()
+
+        if not user or not user.check_password(password):
+            return {'error': 'Username or password not found'}, 404
+        session['user_id'] = user.id
+        session.permanent = True
+        return {
+                'username': user.username,
+                'id': user.id
+            }, 200
     
 class UserById(Resource):
     def get(self, user_id):
@@ -131,7 +151,9 @@ class UserById(Resource):
         
 
         
+api.add_resource(CheckSession,'/check_session')
 api.add_resource(Signup, '/signup')
+api.add_resource(Login, '/login')
 api.add_resource(UserById, '/users/<int:user_id>')
 
 
